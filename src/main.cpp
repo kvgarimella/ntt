@@ -11,7 +11,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-  uint64_t n = 4096;
+  uint64_t n = 4096; // originally, was 4096
   uint64_t p = 68719403009;
   uint64_t r = 36048964756;
 
