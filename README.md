@@ -7,3 +7,8 @@ Need to CUDA-fy the following functions:
 - `modExp`
 - `pow`
 - `modulo`
+
+### Goals:
+
+- By Sunday, April 17, write some simple CUDA programs.
+- Following week, step 1: convert C to CUDA.
