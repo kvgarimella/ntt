@@ -30,6 +30,7 @@ uint64_t *inPlaceNTT_DIT(uint64_t *vec, uint64_t n, uint64_t p, uint64_t r, bool
 			result[i] = vec[i];
 		}
 	}
+	printVec(result, n);
 
 
 	for(uint64_t i = 1; i <= log2(n); i++){ 

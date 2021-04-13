@@ -6,7 +6,7 @@
 
 #include "../include/utils.h" 	//INCLUDE HEADER FILE
 
-/**
+/** O(nlogn)
  * Return vector with each element of the input at its bit-reversed position
  *
  * @param vec The vector to bit reverse
@@ -21,9 +21,11 @@ uint64_t *bit_reverse(uint64_t *vec, uint64_t n){
 	result = (uint64_t *) malloc(n*sizeof(uint64_t));
 
 	uint64_t reverse_num;
+	// iterates over the length of vector: 8 O(n)
 	for(uint64_t i = 0; i < n; i++){
 
 		reverse_num = 0;
+		// iterates over the number of bits for vector unit log_2(8) = 3: O(logn)
 		for(uint64_t j = 0; j < num_bits; j++){
 
 			reverse_num = reverse_num << 1;
