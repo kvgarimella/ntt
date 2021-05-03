@@ -34,6 +34,7 @@ uint64_t *bit_reverse(uint64_t *vec, uint64_t n){
 			}
 		}
 
+                //std::cout << "reverse num: " << reverse_num << std::endl;
 		result[reverse_num] = vec[i];
 
 	}

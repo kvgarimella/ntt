@@ -11,9 +11,9 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-  uint64_t n = 8; // originally was 4096, must be a power of 2
-  uint64_t p = 68719403009;
-  uint64_t r = 36048964756;
+  uint64_t n = 4096; // originally was 4096, must be a power of 2
+  uint64_t p = 1073750017;
+  uint64_t r = 5;
   bool t = true;
 
   uint64_t vec[n];
