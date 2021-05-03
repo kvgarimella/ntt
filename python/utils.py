@@ -44,3 +44,24 @@ def get_indices(array_size):
         return LUT11
     elif array_size == 4096:
         return LUT12
+
+
+def bit_reverse(vec, n):
+    result = torch.zeros_like(vec)
+    result[get_indices(n)] = vec
+    return result 
+
+def modulo(base, m):
+    result = base % m
+    if result >= 0:
+        return result
+    return result + m
+
+def mod_exp(base, exp, m):
+    result = 1
+    while (exp > 0):
+        if (exp % 2):
+            result = modulo(result * base, m)
+        exp = exp >> 1
+        base = modulo(base*base, m)
+    return result

@@ -1,2 +1,3 @@
 ntt
 *.o
+__pycache__
