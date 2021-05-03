@@ -1,3 +1,7 @@
+'''
+Inspiration from: # https://stackoverflow.com/questions/12681945/reversing-bits-of-python-integer
+'''
+
 import torch
 LUT0  = torch.load("bit_reversal_tables/LUT0.pt")
 LUT1  = torch.load("bit_reversal_tables/LUT1.pt")
