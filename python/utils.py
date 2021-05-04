@@ -84,7 +84,7 @@ def mod_exp(b,e,m):
     b = torch.remainder(b,m)
     gtz = e > 0
     while torch.any(gtz):
-        condition = (e[gtz] & 1).type(torch.bool).to(device)
+        condition = torch.remainder(e[gtz], 2) == 1
         r[gtz] = torch.where(condition,torch.remainder(r[gtz]*b[gtz],m),r[gtz])
         e[gtz]>>=1
         b[gtz] = torch.remainder(b[gtz]**2, m)
