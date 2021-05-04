@@ -1,68 +1,84 @@
 '''
-Inspiration from: # https://stackoverflow.com/questions/12681945/reversing-bits-of-python-integer
+Author: Karthik Garimella
+Date  : May 04, 2021
+
+References:
+1. Bit Reversal Lookup Tables
+2. Right-to-left Binary Modular Exponentation
+
+[1]: https://stackoverflow.com/questions/12681945/reversing-bits-of-python-integer
+[2]: https://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
 '''
 
 import torch
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print("Device for loading bit reversal tables..", device)
-LUT0  = torch.load("bit_reversal_tables/LUT0.pt").to(device);
-LUT1  = torch.load("bit_reversal_tables/LUT1.pt").to(device);
-LUT2  = torch.load("bit_reversal_tables/LUT2.pt").to(device);
-LUT3  = torch.load("bit_reversal_tables/LUT3.pt").to(device);
-LUT4  = torch.load("bit_reversal_tables/LUT4.pt").to(device);
-LUT5  = torch.load("bit_reversal_tables/LUT5.pt").to(device);
-LUT6  = torch.load("bit_reversal_tables/LUT6.pt").to(device);
-LUT7  = torch.load("bit_reversal_tables/LUT7.pt").to(device);
-LUT8  = torch.load("bit_reversal_tables/LUT8.pt").to(device);
-LUT9  = torch.load("bit_reversal_tables/LUT9.pt").to(device);
-LUT10 = torch.load("bit_reversal_tables/LUT10.pt").to(device);
-LUT11 = torch.load("bit_reversal_tables/LUT11.pt").to(device);
-LUT12 = torch.load("bit_reversal_tables/LUT12.pt").to(device);
+#LUT0  = torch.load("bit_reversal_tables/LUT0.pt").to(device);
+#LUT1  = torch.load("bit_reversal_tables/LUT1.pt").to(device);
+#LUT2  = torch.load("bit_reversal_tables/LUT2.pt").to(device);
+#LUT3  = torch.load("bit_reversal_tables/LUT3.pt").to(device);
+#LUT4  = torch.load("bit_reversal_tables/LUT4.pt").to(device);
+#LUT5  = torch.load("bit_reversal_tables/LUT5.pt").to(device);
+#LUT6  = torch.load("bit_reversal_tables/LUT6.pt").to(device);
+#LUT7  = torch.load("bit_reversal_tables/LUT7.pt").to(device);
+#LUT8  = torch.load("bit_reversal_tables/LUT8.pt").to(device);
+#LUT9  = torch.load("bit_reversal_tables/LUT9.pt").to(device);
+#LUT10 = torch.load("bit_reversal_tables/LUT10.pt").to(device);
+#LUT11 = torch.load("bit_reversal_tables/LUT11.pt").to(device);
+#LUT12 = torch.load("bit_reversal_tables/LUT12.pt").to(device);
 
 def get_indices(array_size):
     if array_size == 1:
-        return LUT0
+        return torch.load("bit_reversal_tables/LUT0.pt").to(device)
     elif array_size == 2:
-        return LUT1
+        return torch.load("bit_reversal_tables/LUT1.pt").to(device)
     elif array_size == 4:
-        return LUT2
+        return torch.load("bit_reversal_tables/LUT2.pt").to(device)
     elif array_size == 8:
-        return LUT3
+        return torch.load("bit_reversal_tables/LUT3.pt").to(device)
     elif array_size == 16:
-        return LUT4
+        return torch.load("bit_reversal_tables/LUT4.pt").to(device)
     elif array_size == 32:
-        return LUT5
+        return torch.load("bit_reversal_tables/LUT5.pt").to(device)
     elif array_size == 64:
-        return LUT6
+        return torch.load("bit_reversal_tables/LUT6.pt").to(device)
     elif array_size == 128:
-        return LUT7
+        return torch.load("bit_reversal_tables/LUT7.pt").to(device)
     elif array_size == 256:
-        return LUT8
+        return torch.load("bit_reversal_tables/LUT8.pt").to(device)
     elif array_size == 512:
-        return LUT9
+        return torch.load("bit_reversal_tables/LUT9.pt").to(device)
     elif array_size == 1024:
-        return LUT10
+        return torch.load("bit_reversal_tables/LUT10.pt").to(device)
     elif array_size == 2048:
-        return LUT11
+        return  torch.load("bit_reversal_tables/LUT11.pt").to(device)
     elif array_size == 4096:
-        return LUT12
+        return torch.load("bit_reversal_tables/LUT12.pt").to(device)
 
 
 def bit_reverse(vec, n):
+    """
+    input vec    : Vector of numbers
+    input n      : Length of vector
+    output result: vector with each element in bit-reversed position
+
+    Uses a bit-reversal lookup table
+    """
     result = torch.zeros_like(vec)
     result[get_indices(n)] = vec
     return result 
 
 def modulo(base, m):
     """
-    can use torch.remainder(base,m)
+    returns base (mod m)
     """
-    pass
+    return torch.remainder(base,m)
 
 def mod_exp(b,e,m):
     """
-    Right-to-Left binary method
-    https://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
+    returns base^{exp} (mod m)
+    WARNING: operates on e in place
+    Uses right-to-left binary method
     """
     r = torch.ones_like(b)
     b = torch.remainder(b,m)
@@ -76,6 +92,12 @@ def mod_exp(b,e,m):
     return r
 
 def in_place_ntt(vec, p, r):
+    """
+    input vec    : vector of numbers to perform NTT on
+    input p      : prime
+    input r      : primitive root of prime p -> sympy.primitive_root(p)
+    output result: the number theoretic transformed vector
+    """
     LENVEC  = len(vec)
     HALFLEN = LENVEC // 2
     r       = torch.tensor([r]).to(device)

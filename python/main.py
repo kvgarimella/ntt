@@ -1,6 +1,7 @@
 import sys
+import ntt
 import torch
-from utils import *
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print("Performing NTT on.......................", device)
@@ -15,5 +16,5 @@ r = 5
 
 
 vec     = torch.arange(n).to(device)
-outvec  = in_place_ntt(vec, p, r)
+outvec  = ntt.in_place_ntt(vec, p, r)
 print(outvec)
