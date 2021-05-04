@@ -17,7 +17,9 @@ int main(int argc, char *argv[]){
       printf("You must enter a size for the vector! Please make it a power of 2\n");
       return -1;
   }
+
   uint64_t n = atoi(argv[1]);
+
   //uint64_t n = 8; // originally was 4096, must be a power of 2
   uint64_t p = 1073750017;
   uint64_t r = 5;
@@ -31,9 +33,11 @@ int main(int argc, char *argv[]){
   for (int i = 0; i < n; i++){
     vec[i] = i;
   }
+  printf("Original vector: ");
   printVec(vec, n);
 
   uint64_t *outVec = inPlaceNTT_DIT(vec,n,p,r,t);
+  printf("Final vector: ");
   printVec(outVec, n);
   t_end = clock();
   seconds = (double)(t_end - t_start) / CLOCKS_PER_SEC;
