@@ -12,7 +12,7 @@ def in_place_ntt(vec, p, r):
     LENVEC  = len(vec)
     HALFLEN = LENVEC // 2
     r       = torch.tensor([r]).to(device)
-    LG2     = int(torch.log2(torch.tensor([LENVEC])))
+    LG2     = int(torch.log2(torch.tensor([float(LENVEC)])))
 
 
     result  = bit_reverse(vec, LENVEC)
