@@ -80,14 +80,14 @@ def mod_exp(b,e,m):
     WARNING: operates on e in place
     Uses right-to-left binary method
     """
-    r = torch.ones_like(b)
-    b = torch.remainder(b,m)
+    r   = torch.ones_like(b)
+    b   = torch.remainder(b,m)
     gtz = e > 0
     while torch.any(gtz):
         condition = torch.remainder(e[gtz], 2) == 1
-        r[gtz] = torch.where(condition,torch.remainder(r[gtz]*b[gtz],m),r[gtz])
+        r[gtz]    = torch.where(condition,torch.remainder(r[gtz]*b[gtz],m),r[gtz])
         e[gtz]>>=1
         b[gtz] = torch.remainder(b[gtz]**2, m)
-        gtz = e > 0
+        gtz    = e > 0
     return r
 
