@@ -26,6 +26,8 @@ print("Device for loading bit reversal tables..", device)
 #LUT10 = torch.load("bit_reversal_tables/LUT10.pt").to(device);
 #LUT11 = torch.load("bit_reversal_tables/LUT11.pt").to(device);
 #LUT12 = torch.load("bit_reversal_tables/LUT12.pt").to(device);
+ONE = torch.tensor([1]).to(device)
+TWO = torch.tensor([2]).to(device)
 
 def bit_reverse(vec, n):
     """
@@ -55,7 +57,7 @@ def mod_exp(b,e,m):
     b   = torch.remainder(b,m)
     gtz = e > 0
     while torch.any(gtz):
-        condition = torch.remainder(e[gtz], 2) == 1
+        condition = torch.remainder(e[gtz], TWO) == ONE 
         r[gtz]    = torch.where(condition,torch.remainder(r[gtz]*b[gtz],m),r[gtz])
         e[gtz]>>=1
         b[gtz] = torch.remainder(b[gtz]**2, m)
