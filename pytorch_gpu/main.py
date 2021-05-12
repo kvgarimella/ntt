@@ -15,6 +15,6 @@ p = 1073750017
 r = 5 
 
 
-vec     = torch.arange(n).to(device)
+vec     = torch.arange(n, device=device)
 outvec  = ntt.in_place_ntt(vec, p, r)
 print(outvec)

@@ -13,21 +13,8 @@ References:
 import torch
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print("Device for loading bit reversal tables..", device)
-#LUT0  = torch.load("bit_reversal_tables/LUT0.pt").to(device);
-#LUT1  = torch.load("bit_reversal_tables/LUT1.pt").to(device);
-#LUT2  = torch.load("bit_reversal_tables/LUT2.pt").to(device);
-#LUT3  = torch.load("bit_reversal_tables/LUT3.pt").to(device);
-#LUT4  = torch.load("bit_reversal_tables/LUT4.pt").to(device);
-#LUT5  = torch.load("bit_reversal_tables/LUT5.pt").to(device);
-#LUT6  = torch.load("bit_reversal_tables/LUT6.pt").to(device);
-#LUT7  = torch.load("bit_reversal_tables/LUT7.pt").to(device);
-#LUT8  = torch.load("bit_reversal_tables/LUT8.pt").to(device);
-#LUT9  = torch.load("bit_reversal_tables/LUT9.pt").to(device);
-#LUT10 = torch.load("bit_reversal_tables/LUT10.pt").to(device);
-#LUT11 = torch.load("bit_reversal_tables/LUT11.pt").to(device);
-#LUT12 = torch.load("bit_reversal_tables/LUT12.pt").to(device);
-ONE = torch.tensor([1]).to(device)
-TWO = torch.tensor([2]).to(device)
+ONE = torch.tensor([1],device=device)
+TWO = torch.tensor([2],device=device)
 
 def bit_reverse(vec, n):
     """
@@ -66,23 +53,23 @@ def mod_exp(b,e,m):
 
 def get_indices(array_size):
     if array_size == 1:
-        return torch.tensor([0]).to(device) 
+        return torch.tensor([0],device=device) 
     elif array_size == 2:
-        return torch.tensor([0, 1]).to(device)
+        return torch.tensor([0, 1],device=device)
     elif array_size == 4:
-        return torch.tensor([0, 2, 1, 3]).to(device)
+        return torch.tensor([0, 2, 1, 3],device=device)
     elif array_size == 8:
-        return torch.tensor([0, 4, 2, 6, 1, 5, 3, 7]).to(device)
+        return torch.tensor([0, 4, 2, 6, 1, 5, 3, 7],device=device)
     elif array_size == 16:
-        return torch.tensor([ 0,  8,  4, 12,  2, 10,  6, 14,  1,  9,  5, 13,  3, 11,  7, 15]).to(device)
+        return torch.tensor([ 0,  8,  4, 12,  2, 10,  6, 14,  1,  9,  5, 13,  3, 11,  7, 15],device=device)
     elif array_size == 32:
         return torch.tensor([ 0, 16,  8, 24,  4, 20, 12, 28,  2, 18, 10, 26,  6, 22, 14, 30,  1, 17,
-         9, 25,  5, 21, 13, 29,  3, 19, 11, 27,  7, 23, 15, 31]).to(device)
+         9, 25,  5, 21, 13, 29,  3, 19, 11, 27,  7, 23, 15, 31],device=device)
     elif array_size == 64:
         return torch.tensor([ 0, 32, 16, 48,  8, 40, 24, 56,  4, 36, 20, 52, 12, 44, 28, 60,  2, 34,
         18, 50, 10, 42, 26, 58,  6, 38, 22, 54, 14, 46, 30, 62,  1, 33, 17, 49,
          9, 41, 25, 57,  5, 37, 21, 53, 13, 45, 29, 61,  3, 35, 19, 51, 11, 43,
-        27, 59,  7, 39, 23, 55, 15, 47, 31, 63]).to(device)
+        27, 59,  7, 39, 23, 55, 15, 47, 31, 63],device=device)
     elif array_size == 128:
         return torch.tensor([  0,  64,  32,  96,  16,  80,  48, 112,   8,  72,  40, 104,  24,  88,
          56, 120,   4,  68,  36, 100,  20,  84,  52, 116,  12,  76,  44, 108,
@@ -93,7 +80,7 @@ def get_indices(array_size):
          21,  85,  53, 117,  13,  77,  45, 109,  29,  93,  61, 125,   3,  67,
          35,  99,  19,  83,  51, 115,  11,  75,  43, 107,  27,  91,  59, 123,
           7,  71,  39, 103,  23,  87,  55, 119,  15,  79,  47, 111,  31,  95,
-         63, 127]).to(device)
+         63, 127],device=device)
     elif array_size == 256:
         return torch.tensor([  0, 128,  64, 192,  32, 160,  96, 224,  16, 144,  80, 208,  48, 176,
         112, 240,   8, 136,  72, 200,  40, 168, 104, 232,  24, 152,  88, 216,
@@ -113,7 +100,7 @@ def get_indices(array_size):
          75, 203,  43, 171, 107, 235,  27, 155,  91, 219,  59, 187, 123, 251,
           7, 135,  71, 199,  39, 167, 103, 231,  23, 151,  87, 215,  55, 183,
         119, 247,  15, 143,  79, 207,  47, 175, 111, 239,  31, 159,  95, 223,
-         63, 191, 127, 255]).to(device)
+         63, 191, 127, 255],device=device)
     elif array_size == 512:
         return torch.tensor([  0, 256, 128, 384,  64, 320, 192, 448,  32, 288, 160, 416,  96, 352,
         224, 480,  16, 272, 144, 400,  80, 336, 208, 464,  48, 304, 176, 432,
@@ -151,7 +138,7 @@ def get_indices(array_size):
         231, 487,  23, 279, 151, 407,  87, 343, 215, 471,  55, 311, 183, 439,
         119, 375, 247, 503,  15, 271, 143, 399,  79, 335, 207, 463,  47, 303,
         175, 431, 111, 367, 239, 495,  31, 287, 159, 415,  95, 351, 223, 479,
-         63, 319, 191, 447, 127, 383, 255, 511]).to(device)
+         63, 319, 191, 447, 127, 383, 255, 511],device=device)
     elif array_size == 1024:
         return torch.tensor([   0,  512,  256,  768,  128,  640,  384,  896,   64,  576,  320,  832,
          192,  704,  448,  960,   32,  544,  288,  800,  160,  672,  416,  928,
@@ -238,7 +225,7 @@ def get_indices(array_size):
          111,  623,  367,  879,  239,  751,  495, 1007,   31,  543,  287,  799,
          159,  671,  415,  927,   95,  607,  351,  863,  223,  735,  479,  991,
           63,  575,  319,  831,  191,  703,  447,  959,  127,  639,  383,  895,
-         255,  767,  511, 1023]).to(device)
+         255,  767,  511, 1023],device=device)
     elif array_size == 2048:
         return torch.tensor([   0, 1024,  512, 1536,  256, 1280,  768, 1792,  128, 1152,  640, 1664,
          384, 1408,  896, 1920,   64, 1088,  576, 1600,  320, 1344,  832, 1856,
@@ -410,7 +397,7 @@ def get_indices(array_size):
          351, 1375,  863, 1887,  223, 1247,  735, 1759,  479, 1503,  991, 2015,
           63, 1087,  575, 1599,  319, 1343,  831, 1855,  191, 1215,  703, 1727,
          447, 1471,  959, 1983,  127, 1151,  639, 1663,  383, 1407,  895, 1919,
-         255, 1279,  767, 1791,  511, 1535, 1023, 2047]).to(device)
+         255, 1279,  767, 1791,  511, 1535, 1023, 2047],device=device)
     elif array_size == 4096:
         return torch.tensor([   0, 2048, 1024, 3072,  512, 2560, 1536, 3584,  256, 2304, 1280, 3328,
          768, 2816, 1792, 3840,  128, 2176, 1152, 3200,  640, 2688, 1664, 3712,
@@ -753,6 +740,6 @@ def get_indices(array_size):
          447, 2495, 1471, 3519,  959, 3007, 1983, 4031,  127, 2175, 1151, 3199,
          639, 2687, 1663, 3711,  383, 2431, 1407, 3455,  895, 2943, 1919, 3967,
          255, 2303, 1279, 3327,  767, 2815, 1791, 3839,  511, 2559, 1535, 3583,
-        1023, 3071, 2047, 4095]).to(device)
+        1023, 3071, 2047, 4095],device=device)
 
 

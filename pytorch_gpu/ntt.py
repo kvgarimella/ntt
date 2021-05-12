@@ -11,9 +11,9 @@ def in_place_ntt(vec, p, r):
     """
     LENVEC  = len(vec)
     HALFLEN = LENVEC // 2
-    r       = torch.tensor([r]).to(device)
+    r       = torch.tensor([r],device=device)
     LG2     = int(torch.log2(torch.tensor([float(LENVEC)])))
-    ms      = 2**torch.arange(1,LG2+1).to(device)
+    ms      = 2**torch.arange(1,LG2+1,device=device)
 
 
     result  = bit_reverse(vec, LENVEC)
@@ -22,11 +22,11 @@ def in_place_ntt(vec, p, r):
         k_ = (p-1)//m
         a  = mod_exp(r, k_, p).repeat(HALFLEN)
 
-        ks = torch.arange(2**(i-1)).to(device)
+        ks = torch.arange(2**(i-1),device=device)
         ks = ks.repeat(HALFLEN//len(ks))
         ks_exp = torch.clone(ks)
 
-        js = torch.arange(0,LENVEC,2**i).to(device)
+        js = torch.arange(0,LENVEC,2**i,device=device)
         js = js.repeat_interleave(HALFLEN // len(js))
 
         factor1 = result[js+ks]
