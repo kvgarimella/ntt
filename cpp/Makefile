@@ -6,7 +6,7 @@ DEPS=$(wildcard include/*.h)
 	$(CXX) -c -o $@ $< -Iinclude
 
 ntt: $(OBJ) 
-	$(CXX) -o $@ $^ -Iinclude
+	nvcc -o $@ $^ -Iinclude
 
 clean:
 	rm -rfv ntt $(OBJ)
