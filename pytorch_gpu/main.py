@@ -17,10 +17,9 @@ d = int(sys.argv[2])
 
 p = 1073750017
 r = 5 
-print(n,d)
 
 vec = torch.arange(n, device=device)
-vec = vec.repeat(d).reshape(d,n)
-print(vec.shape)
-#outvec  = ntt.in_place_ntt(vec, p, r)
-#print(outvec)
+vec = vec.repeat(d).reshape(d,n).T
+outvec  = ntt.in_place_ntt(vec, p, r)
+print(outvec[:,0])
+assert(torch.equal(outvec[:,0], outvec[:,-1]))

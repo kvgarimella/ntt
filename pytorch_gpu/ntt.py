@@ -30,7 +30,7 @@ def in_place_ntt(vec, p, r):
         js = js.repeat_interleave(HALFLEN // len(js))
 
         factor1 = result[js+ks]
-        factor2 = torch.remainder(mod_exp(a,ks_exp,p)*result[js+ks+m//2],p)
+        factor2 = torch.remainder(mod_exp(a,ks_exp,p)[...,None]*result[js+ks+m//2],p)
         result[js+ks]      = torch.remainder(factor1+factor2,p)
         result[js+ks+m//2] = torch.remainder(factor1-factor2,p)
     return result

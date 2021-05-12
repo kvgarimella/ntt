@@ -25,7 +25,7 @@ def bit_reverse(vec, n):
     Uses a bit-reversal lookup table
     """
     result = torch.zeros_like(vec)
-    result[get_indices(n)] = vec
+    result[get_indices(n),...] = vec
     return result 
 
 def modulo(base, m):
