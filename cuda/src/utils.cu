@@ -1,34 +1,4 @@
-#include <cmath>		/* pow() */
-#include <cstdint>		/* uint64_t */
-#include <ctime>		/* time() */
-#include <cstdlib>
 
-#include <unistd.h>
-#include <iostream>
-
-//#include "../include/ntt.h"	/* naiveNTT(), outOfPlaceNTT_DIT() */
-//#include "../include/utils.h"	/* printVec() */
-
-
-using namespace std;
-#include <ctime>		/* time() */
-#include <sys/time.h>
-#include <stdlib.h>
-#include <iostream>
-#include <cstdint> 		/* int64_t, uint64_t */
-const bool DEBUG = true;
-void printVec(uint64_t *vec, uint64_t n){
-
-	std::cout << "[";
-	for(uint64_t i = 0; i < n; i++){
-
-		std::cout << vec[i] << ",";
-
-	}
-	std::cout << "]" << std::endl;
-}
-
-// called by the cpu but executed on the gpu
 __global__ void bit_reverse_gpu(uint64_t *vec, uint64_t *result, int *indices, uint64_t n, uint64_t batch){
   int batch_id = blockIdx.x; // one block (with n threads) handles one vector if possible
   int j = threadIdx.x;
@@ -46,100 +16,8 @@ __global__ void bit_reverse_gpu(uint64_t *vec, uint64_t *result, int *indices, u
   }
 }
 
-// called by the gpu and executed on the gpu 
-__device__ uint64_t modulo(int64_t base, int64_t m){
-	int64_t result = base % m;
-
-	return (result >= 0) ? result : result + m;
-}
-
-uint64_t modulo_cpu(int64_t base, int64_t m){
-	int64_t result = base % m;
-
-	return (result >= 0) ? result : result + m;
-}
-
-__device__ uint64_t modExp(uint64_t base, uint64_t exp, uint64_t m){
-
-	uint64_t result = 1;
-	
-	while(exp > 0){
-
-		if(exp % 2){
-
-			result = modulo(result*base, m);
-
-		}
-
-		exp = exp >> 1;
-		base = modulo(base*base,m);
-	}
-
-	return result;
-}
-uint64_t modExp_cpu(uint64_t base, uint64_t exp, uint64_t m){
-
-	uint64_t result = 1;
-	
-	while(exp > 0){
-
-		if(exp % 2){
-
-			result = modulo_cpu(result*base, m);
-
-		}
-
-		exp = exp >> 1;
-		base = modulo_cpu(base*base,m);
-	}
-
-	return result;
-}
-
-
-__global__ void inner_loop(uint64_t *result, uint64_t n, uint64_t p, uint64_t m, uint64_t a){
-    uint64_t factor1, factor2;
-    int idx = threadIdx.x;
-    for(uint64_t j = 0; j < n; j+=m){
-
-			for(uint64_t k = 0; k < m/2; k++){
-
-				factor1 = result[j + k + idx * n];
-				factor2 = modulo(modExp(a,k,p)*result[j + k + m/2 + idx * n],p);
-
-			
-				result[j + k + idx * n] 		= modulo(factor1 + factor2, p);
-				result[j + k+m/2 + idx * n] 	= modulo(factor1 - factor2, p);
-
-			}
-    }
-
-}
-
-__host__ void inPlaceNTT_DIT(uint64_t *result, uint64_t n, uint64_t p, uint64_t r, bool rev, uint64_t batch){
-
-	uint64_t m, k_, a;
-	for(uint64_t i = 1; i <= log2(n); i++){ 
-
-		m = pow(2,i);
-		k_ = (p - 1)/m;
-		a = modExp_cpu(r,k_,p);
-                if (DEBUG)
-                {
-                    printf("modExps: %llu, %llu, %llu\n", r, k_, p);
-                    printf("a: %llu\n", a);
-                }
-        inner_loop<<<1,batch>>>(result,n,p,m,a); 
-	}
-
-}
-
-
-
-double seconds_send_indice_GPU;
-double seconds_LUT_GPU;
-
 __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch){
+
   int size = n*batch * sizeof(uint64_t);
 
   int get_indices1[] = {0};
@@ -748,7 +626,7 @@ __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch)
       915, 2963, 1939, 3987,   83, 2131, 1107, 3155,  595, 2643, 1619, 3667,
       339, 2387, 1363, 3411,  851, 2899, 1875, 3923,  211, 2259, 1235, 3283,
       723, 2771, 1747, 3795,  467, 2515, 1491, 3539,  979, 3027, 2003, 4051,
-        51, 2099, 1075, 3123,  563, 2611, 1587, 3635,  307, 2355, 1331, 3379,
+      51, 2099, 1075, 3123,  563, 2611, 1587, 3635,  307, 2355, 1331, 3379,
       819, 2867, 1843, 3891,  179, 2227, 1203, 3251,  691, 2739, 1715, 3763,
       435, 2483, 1459, 3507,  947, 2995, 1971, 4019,  115, 2163, 1139, 3187,
       627, 2675, 1651, 3699,  371, 2419, 1395, 3443,  883, 2931, 1907, 3955,
@@ -868,14 +746,10 @@ __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch)
     cudaMemcpy(get_indices_gpu, get_indices4096, n * sizeof(int), cudaMemcpyHostToDevice);
     break;
   }
-  gettimeofday( &t_end_send_indice_GPU, NULL );
-  seconds_send_indice_GPU = 1000000 * ( t_end_send_indice_GPU.tv_sec - t_start_send_indice_GPU.tv_sec ) + t_end_send_indice_GPU.tv_usec - t_start_send_indice_GPU.tv_usec;
 
   uint64_t*result;
   cudaMalloc((void**)&result, size); // set a place to save the result
 
-  struct timeval t_start_LUT_GPU, t_end_LUT_GPU;
-  gettimeofday( &t_start_LUT_GPU, NULL );
   if (n<=1024){
     bit_reverse_gpu<<<batch, n>>>(vec, result, get_indices_gpu, n, batch);
   }
@@ -883,65 +757,7 @@ __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch)
     bit_reverse_gpu<<<n*batch/1024, 1024>>>(vec, result, get_indices_gpu, n, batch);
   }
 
-  gettimeofday( &t_end_LUT_GPU, NULL );
-  seconds_LUT_GPU = 1000000 * ( t_end_LUT_GPU.tv_sec - t_start_LUT_GPU.tv_sec ) + t_end_LUT_GPU.tv_usec - t_start_LUT_GPU.tv_usec;
   cudaFree(get_indices_gpu);  
   return result;
 }
 
-
-int main(int argc, char *argv[]){
-  if (argc < 2)
-  {
-      printf("You must enter a size for the vector! Please make it a power of 2\n");
-      return -1;
-  }
-
-  uint64_t n = atoi(argv[1]);
-  uint64_t batch = atoi(argv[2]);
-
-  //uint64_t n = 8; // originally was 4096, must be a power of 2
-
-  uint64_t p = 1073750017;
-  uint64_t r = 5;
-  bool t     = true;
-
-  clock_t t_start, t_end;
-  t_start = clock();
-  double seconds;
-
-  int size = n * batch*sizeof(uint64_t);
-  uint64_t vec[size];
-  for (int kk = 0; kk < batch; ++kk){
-      for (int ii = 0; ii < n; ++ii)
-          vec[kk*n + ii] = ii;
-  }
-
-  printf("Original vector: ");
-  printVec(vec, n*batch);
-
-  uint64_t *result_gpu, *vec_gpu, *result_cpu;
-  result_cpu = (uint64_t *) malloc(size);
-
-  // creating space for our result vector on the gpu
-  cudaMalloc((void**)&vec_gpu, size);
-  // putting vector values at vec_gpu
-  cudaMemcpy(vec_gpu, vec, size, cudaMemcpyHostToDevice);
-  result_gpu = bit_reverse_table(vec_gpu, n, batch);
-  // vec_gpu is still [0,1,2,3,4,5,6,7]
-  // result_gpu is now [0,4,...,7]
-  inPlaceNTT_DIT(result_gpu, n, p, r, t, batch); 
-  printf("HELLO\n");
-  cudaMemcpy(result_cpu, result_gpu, size, cudaMemcpyDeviceToHost);
-  printVec(result_cpu, n*batch);
-
-  cudaFree(result_gpu);
-  cudaFree(vec_gpu);
-  free(result_cpu);
-
-  t_end = clock();
-  seconds = (double)(t_end - t_start) / CLOCKS_PER_SEC;
-  printf("Time: %f\n", seconds);
-  return 0;
-
-}

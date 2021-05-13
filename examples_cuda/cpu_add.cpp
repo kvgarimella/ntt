@@ -11,7 +11,7 @@ void add(int n, float *x, float *y)
 
 int main(void)
 {
-    int N = 1<<20; // basically 1mil 
+    int N = 32; 
     printf("Number of elements: %d\n", N);
 
     float *x = new float[N];
