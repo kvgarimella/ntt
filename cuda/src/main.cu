@@ -99,7 +99,7 @@ uint64_t modExp_cpu(uint64_t base, uint64_t exp, uint64_t m){
 
 __global__ void inner_loop(uint64_t *result, uint64_t n, uint64_t p, uint64_t m, uint64_t a){
     uint64_t factor1, factor2;
-    int idx = threadIdx.x;
+    int idx = blockIdx.x;
     for(uint64_t j = 0; j < n; j+=m){
 
 			for(uint64_t k = 0; k < m/2; k++){
@@ -129,7 +129,7 @@ __host__ void inPlaceNTT_DIT(uint64_t *result, uint64_t n, uint64_t p, uint64_t 
                     printf("modExps: %llu, %llu, %llu\n", r, k_, p);
                     printf("a: %llu\n", a);
                 }
-        inner_loop<<<1,batch>>>(result,n,p,m,a); 
+        inner_loop<<<batch,1>>>(result,n,p,m,a); 
 	}
 
 }
