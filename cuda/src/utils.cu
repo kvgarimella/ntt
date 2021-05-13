@@ -1,7 +1,32 @@
+#include <cmath>		/* pow() */
+#include <cstdint>		/* uint64_t */
+#include <ctime>		/* time() */
+#include <cstdlib>
+#include <unistd.h>
+#include <iostream>
+
+using namespace std;
+#include <ctime>		/* time() */
+#include <sys/time.h>
+#include <stdlib.h>
+#include <iostream>
+#include <cstdint> 		/* int64_t, uint64_t */
+
+void printVec(uint64_t *vec, uint64_t n){
+
+	std::cout << "[";
+	for(uint64_t i = 0; i < n; i++){
+
+		std::cout << vec[i] << ",";
+
+	}
+	std::cout << "]" << std::endl;
+}
 
 __global__ void bit_reverse_gpu(uint64_t *vec, uint64_t *result, int *indices, uint64_t n, uint64_t batch){
   int batch_id = blockIdx.x; // one block (with n threads) handles one vector if possible
-  int j = threadIdx.x;
+  int j        = threadIdx.x;
+
   int blockdim = blockDim.x;
   if(blockDim.x == n){
     // one block (with n threads) handles one vector
@@ -17,7 +42,6 @@ __global__ void bit_reverse_gpu(uint64_t *vec, uint64_t *result, int *indices, u
 }
 
 __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch){
-
   int size = n*batch * sizeof(uint64_t);
 
   int get_indices1[] = {0};
@@ -626,7 +650,7 @@ __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch)
       915, 2963, 1939, 3987,   83, 2131, 1107, 3155,  595, 2643, 1619, 3667,
       339, 2387, 1363, 3411,  851, 2899, 1875, 3923,  211, 2259, 1235, 3283,
       723, 2771, 1747, 3795,  467, 2515, 1491, 3539,  979, 3027, 2003, 4051,
-      51, 2099, 1075, 3123,  563, 2611, 1587, 3635,  307, 2355, 1331, 3379,
+        51, 2099, 1075, 3123,  563, 2611, 1587, 3635,  307, 2355, 1331, 3379,
       819, 2867, 1843, 3891,  179, 2227, 1203, 3251,  691, 2739, 1715, 3763,
       435, 2483, 1459, 3507,  947, 2995, 1971, 4019,  115, 2163, 1139, 3187,
       627, 2675, 1651, 3699,  371, 2419, 1395, 3443,  883, 2931, 1907, 3955,
@@ -698,12 +722,9 @@ __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch)
       1023, 3071, 2047, 4095};
       
 
-  struct timeval t_start_send_indice_GPU, t_end_send_indice_GPU;
   int *get_indices_gpu;
-
   cudaMalloc((void**)&get_indices_gpu, n * sizeof(int));
 
-  gettimeofday( &t_start_send_indice_GPU, NULL );
 
   switch(n){
     case 1 : 
@@ -750,10 +771,13 @@ __host__ uint64_t * bit_reverse_table(uint64_t *vec, uint64_t n, uint64_t batch)
   uint64_t*result;
   cudaMalloc((void**)&result, size); // set a place to save the result
 
-  if (n<=1024){
+
+  if (n<=1024)
+  {
     bit_reverse_gpu<<<batch, n>>>(vec, result, get_indices_gpu, n, batch);
   }
-  else{
+  else
+  {
     bit_reverse_gpu<<<n*batch/1024, 1024>>>(vec, result, get_indices_gpu, n, batch);
   }
 
