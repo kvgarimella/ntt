@@ -16,7 +16,7 @@ using namespace std;
 #include <stdlib.h>
 #include <iostream>
 #include <cstdint> 		/* int64_t, uint64_t */
-const bool DEBUG = true;
+const bool DEBUG = false;
 void printVec(uint64_t *vec, uint64_t n){
 
 	std::cout << "[";
@@ -32,6 +32,7 @@ void printVec(uint64_t *vec, uint64_t n){
 __global__ void bit_reverse_gpu(uint64_t *vec, uint64_t *result, int *indices, uint64_t n, uint64_t batch){
   int batch_id = blockIdx.x; // one block (with n threads) handles one vector if possible
   int j = threadIdx.x;
+
   int blockdim = blockDim.x;
   if(blockDim.x == n){
     // one block (with n threads) handles one vector
@@ -97,12 +98,16 @@ uint64_t modExp_cpu(uint64_t base, uint64_t exp, uint64_t m){
 }
 
 
-__global__ void inner_loop(uint64_t *result, uint64_t n, uint64_t p, uint64_t m, uint64_t a){
+__global__ void inner_loop(uint64_t *result, uint64_t n, uint64_t p, uint64_t m, uint64_t a, uint64_t batch){
     uint64_t factor1, factor2;
-    int idx = blockIdx.x;
-    for(uint64_t j = 0; j < n; j+=m){
+   // int idx = blockIdx.x;
+    //int j = m*threadIdx.x;
+    //int k = threadIdx.y;
 
-			for(uint64_t k = 0; k < m/2; k++){
+    int idx = threadIdx.x;
+    int j = m*blockIdx.x;
+    int k = blockIdx.y;
+    if ((j + k + m/2 + idx*n) < n*batch){ 
 
 				factor1 = result[j + k + idx * n];
 				factor2 = modulo(modExp(a,k,p)*result[j + k + m/2 + idx * n],p);
@@ -110,9 +115,7 @@ __global__ void inner_loop(uint64_t *result, uint64_t n, uint64_t p, uint64_t m,
 			
 				result[j + k + idx * n] 		= modulo(factor1 + factor2, p);
 				result[j + k+m/2 + idx * n] 	= modulo(factor1 - factor2, p);
-
-			}
-    }
+   } 
 
 }
 
@@ -129,7 +132,9 @@ __host__ void inPlaceNTT_DIT(uint64_t *result, uint64_t n, uint64_t p, uint64_t 
                     printf("modExps: %llu, %llu, %llu\n", r, k_, p);
                     printf("a: %llu\n", a);
                 }
-        inner_loop<<<batch,1>>>(result,n,p,m,a); 
+        dim3 blocks(n/m, m/2, 1);
+        dim3 threads(batch, 1, 1);
+        inner_loop<<<blocks, threads>>>(result,n,p,m,a,batch); 
 	}
 
 }
@@ -909,16 +914,15 @@ int main(int argc, char *argv[]){
   clock_t t_start, t_end;
   t_start = clock();
   double seconds;
-
   int size = n * batch*sizeof(uint64_t);
-  uint64_t vec[size];
+  uint64_t *vec;
+  vec = (uint64_t *) malloc(size);
   for (int kk = 0; kk < batch; ++kk){
       for (int ii = 0; ii < n; ++ii)
           vec[kk*n + ii] = ii;
   }
-
   printf("Original vector: ");
-  printVec(vec, n*batch);
+  printVec(vec, n);
 
   uint64_t *result_gpu, *vec_gpu, *result_cpu;
   result_cpu = (uint64_t *) malloc(size);
@@ -931,9 +935,8 @@ int main(int argc, char *argv[]){
   // vec_gpu is still [0,1,2,3,4,5,6,7]
   // result_gpu is now [0,4,...,7]
   inPlaceNTT_DIT(result_gpu, n, p, r, t, batch); 
-  printf("HELLO\n");
   cudaMemcpy(result_cpu, result_gpu, size, cudaMemcpyDeviceToHost);
-  printVec(result_cpu, n*batch);
+  printVec(result_cpu, n);
 
   cudaFree(result_gpu);
   cudaFree(vec_gpu);
