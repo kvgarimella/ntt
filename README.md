@@ -1,5 +1,5 @@
 # NTT
-This repo contains various implementations of NTT.
+This repo contains various implementations of [NTT](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_(general)#Number-theoretic_transform).
 
 1. `cpp`     : cpu version in C++
 2. `cuda`    : gpu version in Cuda  
