@@ -1,34 +1,15 @@
-### Monday Morning:
-Nandan:
-- cudafy `utils.cpp`
-- cudafy `inPlaceNTT_DIT.cpp`
+### NTT (Cuda C)
 
-Cambridge:
-- bit reversal lookup tables (refer to utils.py under python directory)
+This directory contains our code for the NTT algorithm written using CUDA kernels. It supports vectors up to length 4096 and batch size up to 1024.
+```bash
+Usage: ./ntt [Vector Size] [Batch Size]
+```
+Within the `src` directory, you may run:
 
-Karthik: 
-- cudafy `main.cpp`
+```bash
+>>> make clean; make
+>>> ./ntt 8 16
+Original vector: [0,1,2,3,4,5,6,7,]
+Final vector   : [28,863448385,483161238,970875918,1073750013,102874091,590588771,210301624,]
+```
 
-Check results for grid, block, thread = <<<1,1,1>>>
-
-- pull out twiddle factors
-- change grid, block, thread
-
-### Tuesday:
-
-- add batch_size
-
-
-
-### Old
-
-- `inPlaceNTT_DIT`
-- `bit_reverse`
-- `modExp`
-- `pow`
-- `modulo`
-
-### Goals:
-
-- By Sunday, April 17, write some simple CUDA programs.
-- Following week, step 1: convert C to CUDA.
