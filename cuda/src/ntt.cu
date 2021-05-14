@@ -1,14 +1,16 @@
+uint64_t modulo_cpu(int64_t base, int64_t m){
+	int64_t result = base % m;
+
+	return (result >= 0) ? result : result + m;
+}
+
+
 __device__ uint64_t modulo(int64_t base, int64_t m){
 	int64_t result = base % m;
 
 	return (result >= 0) ? result : result + m;
 }
 
-uint64_t modulo_cpu(int64_t base, int64_t m){
-	int64_t result = base % m;
-
-	return (result >= 0) ? result : result + m;
-}
 
 __device__ uint64_t modExp(uint64_t base, uint64_t exp, uint64_t m){
 
@@ -28,10 +30,11 @@ __device__ uint64_t modExp(uint64_t base, uint64_t exp, uint64_t m){
 
 	return result;
 }
+
 uint64_t modExp_cpu(uint64_t base, uint64_t exp, uint64_t m){
 
 	uint64_t result = 1;
-	
+
 	while(exp > 0){
 
 		if(exp % 2){
@@ -50,20 +53,22 @@ uint64_t modExp_cpu(uint64_t base, uint64_t exp, uint64_t m){
 
 __global__ void inner_loop(uint64_t *result, uint64_t n, uint64_t p, uint64_t m, uint64_t a, uint64_t batch){
     uint64_t factor1, factor2;
+    int fst_idx, snd_idx; 
 
     int idx = threadIdx.x;
-    int j = m*blockIdx.x;
-    int k = blockIdx.y;
-    if ((j + k + m/2 + idx*n) < n*batch){ 
+    int j   = m * blockIdx.x;
+    int k   = blockIdx.y;
+    fst_idx = j + k + idx * n;
+    snd_idx = fst_idx + m/2;
 
-				factor1 = result[j + k + idx * n];
-				factor2 = modulo(modExp(a,k,p)*result[j + k + m/2 + idx * n],p);
+    if (snd_idx < n * batch){ 
 
-			
-				result[j + k + idx * n] 		= modulo(factor1 + factor2, p);
-				result[j + k+m/2 + idx * n] 	= modulo(factor1 - factor2, p);
+        factor1 = result[fst_idx];
+        factor2 = modulo(modExp(a,k,p)*result[snd_idx],p);
+
+        result[fst_idx] = modulo(factor1 + factor2, p);
+        result[snd_idx] = modulo(factor1 - factor2, p);
    } 
-
 }
 
 __host__ void inPlaceNTT_DIT(uint64_t *result, uint64_t n, uint64_t p, uint64_t r, bool rev, uint64_t batch){
